@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.anipr.beaconstores"
-    android:versionName="1.0"
-    android:versionCode="1" >
+    android:versionCode="1"
+    android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <uses-sdk
         android:minSdkVersion="16"
         android:targetSdkVersion="21" />
@@ -31,8 +34,14 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        
+        <!-- Estimote service responsible for scanning beacons. -->
+        <service
+            android:name="com.estimote.sdk.service.BeaconService"
+            android:exported="false" />
+        <service
+            android:name=".beaconhandler.BeaconDetectorService"
+            android:enabled="true" >
+        </service>
     </application>
 
 </manifest>

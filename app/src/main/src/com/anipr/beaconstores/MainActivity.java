@@ -1,12 +1,13 @@
 package com.anipr.beaconstores;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.anipr.beaconstores.R;
 import com.anipr.beaconstores.DataHandler.WebDataHandler;
+import com.anipr.beaconstores.beaconhandler.BeaconDetectorService;
 import com.estimote.sdk.BeaconManager;
 
 
@@ -17,8 +18,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        webDataHandler = new WebDataHandler();
+        webDataHandler = new WebDataHandler(getApplicationContext());
+        webDataHandler.getOffers();
         webDataHandler.getRegisteredBeacons();
+        Intent i = new Intent(this, BeaconDetectorService.class);
+        startService(i);
     }
 
     @Override

@@ -10,7 +10,7 @@ import android.content.Intent;
 public class OnDeviceBootBroadcastReciever extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent startServiceIntent = new Intent(context, BeaconDetectionService.class);
+        Intent startServiceIntent = new Intent(context, BeaconDetectorService.class);
         context.startService(startServiceIntent);
     }
 }
