@@ -63,9 +63,10 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	// Table Creation queries
 	final String createOffersTable = "create table if not exists "
-			+ OFFERS_TABLE + " ( " + offerCode + " text , " + storeCode
+			+ OFFERS_TABLE + " ( " + offerCode + " text primary key, " + storeCode
 			+ " text, " + offerType + " number, " + offerDesc + " text, "
-			+ offerMinMembership + " text, " + offerStartDate + " text, "
+			 + offerName + " text, "
+			+ offerMinMembership + " text, " + offerStartDate + " text, " + minimumDuration + " text, "
 			+ offerEndDate + " text); ";
 
 	final String createBeaconsTable = "create table if not exists "

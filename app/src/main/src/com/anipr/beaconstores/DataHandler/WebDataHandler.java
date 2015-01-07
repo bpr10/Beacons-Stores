@@ -23,8 +23,8 @@ public class WebDataHandler {
 	private String tag = "WebDataHandler";
 	DbHelper dbHelper;
 	Context context;
-	public static String ConnectionString = "http://ehapi.cloudapp.net:9000/";
-
+//	public static String ConnectionString = "http://ehapi.cloudapp.net:9000/";
+	public static String ConnectionString = "http://ehapi-cloudapp-net-8wdgc88jg5qe.runscope.net/";
 	public WebDataHandler(Context context) {
 		this.context = context;
 	}
@@ -125,7 +125,7 @@ public class WebDataHandler {
 											currentObj.getString("start_time"));
 									cv.put(DbHelper.offerEndDate,
 											currentObj.getString("end_time"));
-									dbWrite.insert(DbHelper.beaconsTable, null,
+									dbWrite.insert(DbHelper.OFFERS_TABLE, null,
 											cv);
 									Log.d(tag, "Offers Inserted");
 								}

@@ -22,6 +22,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.anipr.beaconstores.MainActivity;
+import com.anipr.beaconstores.NotificationsHandler;
 import com.anipr.beaconstores.R;
 import com.anipr.beaconstores.DbHandler.DbHelper;
 import com.estimote.sdk.Beacon;
@@ -45,8 +46,8 @@ public class BeaconDetectorService extends Service {
 	private BeaconManager beaconManager;
 	String TAG = "BeaconService";
 
-	private NotificationManager notificationManager;
 	private String tag = getClass().getSimpleName();
+	private NotificationsHandler notificationHandler;
 
 	@Override
 	public void onCreate() {
@@ -58,10 +59,10 @@ public class BeaconDetectorService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Toast.makeText(getApplicationContext(), "service started", 1000).show();
 		Log.i(tag, "Beacon Detector Service started ");
-		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		if (beaconManager == null) {
 			beaconManager = new BeaconManager(this);
 		}
+		notificationHandler = new NotificationsHandler(getApplicationContext());
 		// Configure verbose debug logging.
 		L.enableDebugLogging(false);
 		beaconManager.setBackgroundScanPeriod(TimeUnit.SECONDS.toMillis(1), 0);
@@ -76,29 +77,28 @@ public class BeaconDetectorService extends Service {
 
 					Proximity proximity = Utils.computeProximity(beacon);
 					if (proximity == Proximity.IMMEDIATE) {
-						Log.d(TAG,
-								"entered in region "
-										+ paramRegion.getProximityUUID());
+						// Log.d(TAG,
+						// "entered in region "
+						// + paramRegion.getProximityUUID());
 						// check for already notified
 						if (!checkBeaconIfNotified(beacon)) {
 							// notify about offer
-							postEntryNotifiaction(beacon);
+							notificationHandler.postEntryNotifiaction(beacon);
 							// postNotification("Entered into "
 							// + beacon.getMinor() + "");
 							markEntryTime(beacon);
 						} else {
-							Log.d(TAG,
-									"already notified "
-											+ paramRegion.getProximityUUID());
+							// Log.d(TAG,
+							// "already notified "
+							// + paramRegion.getProximityUUID());
 							// already notifiied
 						}
 
 					} else if (proximity == Proximity.NEAR) {
-						Log.d(TAG,
-								"exiting in region "
-										+ paramRegion.getProximityUUID());
-						postExitNotification(beacon);
-						// postNotification("Exited the region "
+						// Log.d(TAG,
+						// "exiting in region "
+						// + paramRegion.getProximityUUID());
+						notificationHandler.postExitNotification(beacon);
 						// + beacon.getMinor());
 					}
 				}
@@ -119,121 +119,6 @@ public class BeaconDetectorService extends Service {
 			}
 		});
 		return super.onStartCommand(intent, Service.START_STICKY, startId);
-	}
-
-	protected void postExitNotification(Beacon beacon) {
-		DbHelper dbhelper = DbHelper.getInstance(getApplicationContext());
-		String query = "select * from " + DbHelper.BEACONS_HISTORY_TABLE
-				+ " where " + DbHelper.beaconMAC + " = '"
-				+ beacon.getMacAddress() + "' and " + DbHelper.BeaconExitTime
-				+ " is null;";
-		SQLiteDatabase dbWrite = dbhelper.getWritableDatabase();
-		Cursor exitnotificationCursor = dbWrite.rawQuery(query, null);
-		if (exitnotificationCursor.moveToFirst()) {
-			if ((Calendar.getInstance().getTimeInMillis() - Long
-					.parseLong(exitnotificationCursor
-							.getString(exitnotificationCursor
-									.getColumnIndex(DbHelper.BeaconEntryTime)))) > 10000) {
-				// Post Exit notification
-				ContentValues cv = new ContentValues();
-				cv.put(DbHelper.BeaconExitTime, Calendar.getInstance()
-						.getTimeInMillis());
-				cv.put(DbHelper.BeaconPresenceStatus, DbHelper.BEACON_LEFT);
-				dbWrite.update(
-						DbHelper.BEACONS_HISTORY_TABLE,
-						cv,
-						DbHelper.BeaconEntryTableRowId
-								+ " = "
-								+ exitnotificationCursor.getInt(exitnotificationCursor
-										.getColumnIndex(DbHelper.BeaconEntryTableRowId)),
-						null);
-
-				String msg = "";
-				String storeCOdeQuery = "select * from "
-						+ DbHelper.beaconsTable + " where "
-						+ DbHelper.beaconMAC + " = '" + beacon.getMacAddress()
-						+ "' ;";
-				Cursor beaconsCursor = dbWrite.rawQuery(storeCOdeQuery, null);
-				String storeCode = "";
-				if (beaconsCursor.moveToFirst()) {
-					storeCode = beaconsCursor.getString(beaconsCursor
-							.getColumnIndex(DbHelper.beaconStore));
-					String offersQuery = "select * from "
-							+ DbHelper.OFFERS_TABLE + " where "
-							+ DbHelper.storeCode + " = '" + storeCode
-							+ "' and " + DbHelper.offerType + " = "
-							+ DbHelper.OFFER_TYPE_EXIT + ";";
-					Cursor offersCursor = dbWrite.rawQuery(offersQuery, null);
-					if (offersCursor.moveToFirst()) {
-						msg = "Offer :  "
-								+ offersCursor.getString(offersCursor
-										.getColumnIndex(DbHelper.offerName));
-					}
-
-				}
-				Intent notifyIntent = new Intent(getApplicationContext(),
-						MainActivity.class);
-				notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-				PendingIntent pendingIntent = PendingIntent.getActivities(
-						getApplicationContext(), 0,
-						new Intent[] { notifyIntent },
-						PendingIntent.FLAG_UPDATE_CURRENT);
-				Notification notification = new Notification.Builder(
-						getApplicationContext())
-						.setSmallIcon(R.drawable.ic_launcher)
-						.setContentTitle("Feedback Offer from " + storeCode)
-						.setContentText(msg).setAutoCancel(true)
-						.setContentIntent(pendingIntent).build();
-				notification.defaults |= Notification.DEFAULT_SOUND;
-				notification.defaults |= Notification.DEFAULT_LIGHTS;
-				notificationManager.notify(1, notification);
-			} else {
-				Log.d(tag, "Stayed less than 10 secs ");
-			}
-		} else {
-			Log.d(tag, "Entry record not found ");
-		}
-
-	}
-
-	protected void postEntryNotifiaction(Beacon beacon) {
-		String msg = "";
-		DbHelper dbhelper = DbHelper.getInstance(getApplicationContext());
-		String query = "select * from " + DbHelper.beaconsTable + " where "
-				+ DbHelper.beaconMAC + " = '" + beacon.getMacAddress() + "' ;";
-		SQLiteDatabase dbWrite = dbhelper.getWritableDatabase();
-		Cursor beaconsCursor = dbWrite.rawQuery(query, null);
-		String storeCode = "";
-		if (beaconsCursor.moveToFirst()) {
-			storeCode = beaconsCursor.getString(beaconsCursor
-					.getColumnIndex(DbHelper.beaconStore));
-			String offersQuery = "select * from " + DbHelper.OFFERS_TABLE
-					+ " where " + DbHelper.storeCode + " = '" + storeCode
-					+ "' and " + DbHelper.offerType + " = "
-					+ DbHelper.OFFER_TYPE_ENTRY + ";";
-			Cursor offersCursor = dbWrite.rawQuery(offersQuery, null);
-			if (offersCursor.moveToFirst()) {
-				msg = "Offer :  "
-						+ offersCursor.getString(offersCursor
-								.getColumnIndex(DbHelper.offerName));
-			}
-
-		}
-		Intent notifyIntent = new Intent(getApplicationContext(),
-				MainActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		PendingIntent pendingIntent = PendingIntent.getActivities(
-				getApplicationContext(), 0, new Intent[] { notifyIntent },
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		Notification notification = new Notification.Builder(
-				getApplicationContext()).setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle("Entry Offer from " + storeCode)
-				.setContentText(msg).setAutoCancel(true)
-				.setContentIntent(pendingIntent).build();
-		notification.defaults |= Notification.DEFAULT_SOUND;
-		notification.defaults |= Notification.DEFAULT_LIGHTS;
-		notificationManager.notify(1, notification);
-
 	}
 
 	protected void markEntryTime(Beacon beacon) {
@@ -280,30 +165,30 @@ public class BeaconDetectorService extends Service {
 									+ beaconEntryCursor.getInt(beaconEntryCursor
 											.getColumnIndex(DbHelper.BeaconEntryTableRowId)),
 							null);
-					Log.d(tag, DbHelper.BEACONS_HISTORY_TABLE
+					Log.i(tag, DbHelper.BEACONS_HISTORY_TABLE
 							+ " Updated and notification Pushed");
 
 					// notify
 					return false;
 				} else {
 					// do not notify
-					Log.d(tag,
+					Log.i(tag,
 							"Notified "
 									+ (Calendar.getInstance().getTimeInMillis() - Long.parseLong(beaconEntryCursor.getString(beaconEntryCursor
-											.getColumnIndex(DbHelper.BeaconEntryTime))) / 1000)
-									+ " secs ago");
+											.getColumnIndex(DbHelper.BeaconEntryTime))))
+									/ 1000 + " secs ago");
 					return true;
 				}
 
 			} else {
 				// notify
-				Log.d(tag, "Notify at enrty");
+				Log.i(tag, "Notify at enrty");
 				return false;
 			}
 
 		} else {
 			// do not notify
-			Log.d(tag, "Beacon Does not belong to any store");
+			Log.i(tag, "Beacon Does not belong to any store");
 			return true;
 		}
 
@@ -327,22 +212,22 @@ public class BeaconDetectorService extends Service {
 		return null;
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	@SuppressLint("NewApi")
-	private void postNotification(String msg) {
-		Intent notifyIntent = new Intent(getApplicationContext(),
-				MainActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		PendingIntent pendingIntent = PendingIntent.getActivities(
-				getApplicationContext(), 0, new Intent[] { notifyIntent },
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		Notification notification = new Notification.Builder(
-				getApplicationContext()).setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle("Notify Demo").setContentText(msg)
-				.setAutoCancel(true).setContentIntent(pendingIntent).build();
-		notification.defaults |= Notification.DEFAULT_SOUND;
-		notification.defaults |= Notification.DEFAULT_LIGHTS;
-		notificationManager.notify(123, notification);
-
-	}
+//	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//	@SuppressLint("NewApi")
+//	private void postNotification(String msg) {
+//		Intent notifyIntent = new Intent(getApplicationContext(),
+//				MainActivity.class);
+//		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//		PendingIntent pendingIntent = PendingIntent.getActivities(
+//				getApplicationContext(), 0, new Intent[] { notifyIntent },
+//				PendingIntent.FLAG_UPDATE_CURRENT);
+//		Notification notification = new Notification.Builder(
+//				getApplicationContext()).setSmallIcon(R.drawable.ic_launcher)
+//				.setContentTitle("Notify Demo").setContentText(msg)
+//				.setAutoCancel(true).setContentIntent(pendingIntent).build();
+//		notification.defaults |= Notification.DEFAULT_SOUND;
+//		notification.defaults |= Notification.DEFAULT_LIGHTS;
+//		notificationManager.notify(123, notification);
+//
+//	}
 }
