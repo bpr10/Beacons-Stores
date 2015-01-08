@@ -2,7 +2,6 @@ package com.anipr.beaconstores;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.text.TextUtils;

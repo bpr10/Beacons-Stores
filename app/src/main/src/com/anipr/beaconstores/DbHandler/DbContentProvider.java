@@ -1,9 +1,8 @@
-package com.anipr.beaconstores.DbHandler;
+package com.anipr.beaconstores.dbhandler;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -11,7 +10,6 @@ import android.net.Uri;
  * Created by Techanipr on 1/5/2015.
  */
 public class DbContentProvider extends ContentProvider {
-    private DbHelper dbHelper;
     private static final String AUTHORITY = "com.anipr.beaconstores.DbHandler.DBContentProvider";
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);

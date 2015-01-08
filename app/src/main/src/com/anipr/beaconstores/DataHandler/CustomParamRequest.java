@@ -1,4 +1,4 @@
-package com.anipr.beaconstores.DataHandler;
+package com.anipr.beaconstores.datahandler;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.anipr.beaconstores.DataHandler;
+package com.anipr.beaconstores.datahandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +14,7 @@ import com.android.volley.Request.Method;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.anipr.beaconstores.AppController;
-import com.anipr.beaconstores.DbHandler.DbHelper;
+import com.anipr.beaconstores.dbhandler.DbHelper;
 
 /**
  * Created by Techanipr on 1/5/2015.
@@ -23,8 +23,10 @@ public class WebDataHandler {
 	private String tag = "WebDataHandler";
 	DbHelper dbHelper;
 	Context context;
-//	public static String ConnectionString = "http://ehapi.cloudapp.net:9000/";
+	// public static String ConnectionString =
+	// "http://ehapi.cloudapp.net:9000/";
 	public static String ConnectionString = "http://ehapi-cloudapp-net-8wdgc88jg5qe.runscope.net/";
+
 	public WebDataHandler(Context context) {
 		this.context = context;
 	}
@@ -42,8 +44,8 @@ public class WebDataHandler {
 							if (resposne.getString("code").equals("1")) {
 								JSONArray dataArray = resposne
 										.getJSONArray("data");
-								Toast.makeText(context, "Web data Refreshed",
-										2000).show();
+								Toast.makeText(context, "Stores data Refreshed",
+										Toast.LENGTH_SHORT).show();
 								for (int i = 0; i < dataArray.length(); i++) {
 									JSONObject currentObj = dataArray
 											.getJSONObject(i);
@@ -95,7 +97,7 @@ public class WebDataHandler {
 								JSONArray dataArray = resposne
 										.getJSONArray("data");
 								Toast.makeText(context, "Web data Refreshed",
-										2000).show();
+										Toast.LENGTH_SHORT).show();
 								for (int i = 0; i < dataArray.length(); i++) {
 									JSONObject currentObj = dataArray
 											.getJSONObject(i);
@@ -122,9 +124,17 @@ public class WebDataHandler {
 									cv.put(DbHelper.offerMinMembership,
 											currentObj.getString("membership"));
 									cv.put(DbHelper.offerStartDate,
-											currentObj.getString("start_time"));
+											new DateUtility()
+													.convertSerevrDatetoLocalDate(
+															currentObj
+																	.getString("start_time"))
+													.getTimeInMillis());
 									cv.put(DbHelper.offerEndDate,
-											currentObj.getString("end_time"));
+											new DateUtility()
+													.convertSerevrDatetoLocalDate(
+															currentObj
+																	.getString("end_time"))
+													.getTimeInMillis());
 									dbWrite.insert(DbHelper.OFFERS_TABLE, null,
 											cv);
 									Log.d(tag, "Offers Inserted");

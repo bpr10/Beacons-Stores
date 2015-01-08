@@ -1,6 +1,5 @@
-package com.anipr.beaconstores.DbHandler;
+package com.anipr.beaconstores.dbhandler;
 
-import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -44,7 +43,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String BeaconEntryTableRowId = "_ID";
 	public static final String BeaconEntryTime = "entry";
 	public static final String BeaconExitTime = "exit";
-	public static final String BeaconPresenceStatus = "status";
+	public static final String BeaconEntryNotificationID = "entryNotiicationID";
+	public static final String BeaconExitNotificationID = "exitNotiicationID";
 	public static final int BEACON_PRESENT = 1;
 	public static final int BEACON_LEFT = 0;
 
@@ -66,8 +66,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			+ OFFERS_TABLE + " ( " + offerCode + " text primary key, " + storeCode
 			+ " text, " + offerType + " number, " + offerDesc + " text, "
 			 + offerName + " text, "
-			+ offerMinMembership + " text, " + offerStartDate + " text, " + minimumDuration + " text, "
-			+ offerEndDate + " text); ";
+			+ offerMinMembership + " integer, " + offerStartDate + " integer, " + minimumDuration + " integer, "
+			+ offerEndDate + " integer); ";
 
 	final String createBeaconsTable = "create table if not exists "
 			+ beaconsTable + " ( " + beaconMAC + " text primary key, "
@@ -82,7 +82,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			+ BeaconEntryTime
 			+ " text, "
 			+ BeaconExitTime
-			+ " text, " + BeaconPresenceStatus + " integer); ";
+			+ " text, "+ BeaconEntryNotificationID
+			+ " integer, " + BeaconExitNotificationID+ " integer); ";
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
