@@ -15,7 +15,6 @@ public class AppController extends Application {
 	private RequestQueue mRequestQueue;
 	public static String userCode, cookie;
 	private static AppController mInstance;
-
 	static void playSound(Context context, int resId) {
 		MediaPlayer mp = MediaPlayer.create(context, resId);
 		mp.start();
