@@ -8,8 +8,17 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="com.example.gcm.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="com.example.gcm.permission.C2D_MESSAGE" />
 
     <uses-sdk
@@ -23,8 +32,8 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Mytheme" >
         <activity
-            android:name="com.anipr.beaconstores.MainActivity"
-            android:label="@string/app_name">
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,7 +41,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.anipr.beaconstores.beaconhandler.OnDeviceBootBroadcastReciever" >
+        <receiver android:name=".beaconhandler.OnDeviceBootBroadcastReciever" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -45,7 +54,24 @@
             android:name=".beaconhandler.BeaconDetectorService"
             android:enabled="true" >
         </service>
-        <receiver
+
+        <activity
+            android:name=".Login"
+            android:label="@string/title_activity_login" >
+        </activity>
+        <activity
+            android:name=".SuperActivity"
+            android:label="@string/title_activity_super" >
+        </activity>
+        <activity
+            android:name=".DMainActivity"
+            android:label="@string/title_activity_dmain" >
+        </activity>
+        <activity
+            android:name=".OfferDetails"
+            android:label="@string/title_activity_offer_details" >
+        </activity>
+        <receiver
             android:name=".GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
@@ -59,7 +85,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service android:name="gcmhandler.GcmIntentService" />
+        <service android:name=".GcmIntentService" />
     </application>
 
 </manifest>

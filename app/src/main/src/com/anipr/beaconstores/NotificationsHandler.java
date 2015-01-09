@@ -71,6 +71,7 @@ public class NotificationsHandler {
 		Cursor beaconsCursor = dbWrite.rawQuery(query, null);
 		String storeCode = "";
 		String offerName = "";
+		String offerCode = "";
 		if (beaconsCursor.moveToFirst()) {
 			storeCode = beaconsCursor.getString(beaconsCursor
 					.getColumnIndex(DbHelper.beaconStore));
@@ -81,13 +82,16 @@ public class NotificationsHandler {
 					+ DbHelper.OFFER_TYPE_ENTRY + " AND " + DbHelper.storeCode
 					+ " = '" + storeCode + "' AND "
 					+ DbHelper.offerMinMembership + " <= +" + userMembership
-					+ " ORDER BY " +DbHelper.offerMinMembership+" DESC, "+ DbHelper.offerEndDate + " ASC";
+					+ " ORDER BY " + DbHelper.offerMinMembership + " DESC, "
+					+ DbHelper.offerEndDate + " ASC";
 
 			Cursor offersCursor = dbWrite.rawQuery(offerQuery, null);
 			if (offersCursor.moveToFirst()) {
 				offerName = "Offer :  "
 						+ offersCursor.getString(offersCursor
 								.getColumnIndex(DbHelper.offerName));
+				offerCode = offersCursor.getString(offersCursor
+						.getColumnIndex(DbHelper.offerCode));
 			} else {
 				offerName = "";
 				Log.i(tag, "Cursor Empty");
@@ -95,11 +99,12 @@ public class NotificationsHandler {
 
 		}
 		postNotification("Welcome to " + storeCode, offerName,
-				markEntryTime(beacon));
+				markEntryTime(beacon), offerCode);
 	}
 
 	public void postExitNotification(Beacon beacon) {
 		// Get Entry Record Row ID
+		String offerCode = "";
 		Map<String, Integer> entryRowInfo = new HashMap<String, Integer>();
 		entryRowInfo.putAll(getEntryRowId(beacon));
 		if (entryRowInfo.get(ENTRY_ROW_ID) != 0) {
@@ -109,9 +114,11 @@ public class NotificationsHandler {
 			String feedbackOfferQuery = "SELECT * FROM "
 					+ DbHelper.OFFERS_TABLE + " WHERE " + DbHelper.offerType
 					+ " = " + DbHelper.OFFER_TYPE_EXIT + " AND "
-					+ DbHelper.offerMinMembership + " <= " + getUserMembership()
-					+ " AND " + DbHelper.minimumDuration + " < " + timeOfStay
-					+ " ORDER BY "+DbHelper.offerMinMembership+" DESC, " + DbHelper.offerEndDate + " ASC, "
+					+ DbHelper.offerMinMembership + " <= "
+					+ getUserMembership() + " AND " + DbHelper.minimumDuration
+					+ " < " + timeOfStay + " ORDER BY "
+					+ DbHelper.offerMinMembership + " DESC, "
+					+ DbHelper.offerEndDate + " ASC, "
 					+ DbHelper.minimumDuration + " DESC";
 			Log.i("feedback xursor query", feedbackOfferQuery);
 			DbHelper dbhelper = DbHelper.getInstance(context);
@@ -126,16 +133,16 @@ public class NotificationsHandler {
 				offerName = feedbackOfferDetailsCursor
 						.getString(feedbackOfferDetailsCursor
 								.getColumnIndex(DbHelper.offerName));
-
+				offerCode = feedbackOfferDetailsCursor
+						.getString(feedbackOfferDetailsCursor
+								.getColumnIndex(DbHelper.offerCode));
 			} else {
 				storeCode = "Thank you for visiting us";
 				offerName = "";
 			}
 			postNotification(storeCode, offerName,
-					markExitTime(entryRowInfo.get(ENTRY_ROW_ID)));
+					markExitTime(entryRowInfo.get(ENTRY_ROW_ID)), offerCode);
 		}
-
-		
 
 	}
 
@@ -167,7 +174,7 @@ public class NotificationsHandler {
 							.getColumnIndex(DbHelper.BeaconEntryTableRowId))));
 			entryRowInfo
 					.put(TIME_OF_STAY,
-							(int)( Calendar.getInstance().getTimeInMillis() - Long.parseLong(entryCursor.getString(entryCursor
+							(int) (Calendar.getInstance().getTimeInMillis() - Long.parseLong(entryCursor.getString(entryCursor
 									.getColumnIndex(DbHelper.BeaconEntryTime)))) / 1000);
 
 		} else {
@@ -195,7 +202,9 @@ public class NotificationsHandler {
 		Cursor rowIDCursor = dbWrite.rawQuery(rowIdQuery, null);
 		if (rowIDCursor.moveToFirst()) {
 			return Integer.parseInt(rowIDCursor.getString(rowIDCursor
-					.getColumnIndex(DbHelper.BeaconEntryTableRowId)) + "" +  DbHelper.OFFER_TYPE_ENTRY);
+					.getColumnIndex(DbHelper.BeaconEntryTableRowId))
+					+ ""
+					+ DbHelper.OFFER_TYPE_ENTRY);
 		} else {
 			return 1;
 		}
@@ -211,9 +220,18 @@ public class NotificationsHandler {
 		return 1;
 	}
 
-	void postNotification(String title, String content, int notificationId) {
-		Intent notifyIntent = new Intent(context, MainActivity.class);
-		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	void postNotification(String title, String content, int notificationId,
+			String offerCode) {
+		Intent notifyIntent;
+		if (offerCode.length() == 0) {
+			notifyIntent = new Intent(context, MainActivity.class);
+
+			notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		} else {
+			notifyIntent = new Intent(context, OfferDetails.class);
+			notifyIntent.putExtra(DbHelper.offerCode, offerCode);
+			notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		}
 		PendingIntent pendingIntent = PendingIntent.getActivities(context, 0,
 				new Intent[] { notifyIntent },
 				PendingIntent.FLAG_UPDATE_CURRENT);
@@ -222,7 +240,6 @@ public class NotificationsHandler {
 				.setContentText(content).setAutoCancel(true)
 				.setContentIntent(pendingIntent).build();
 		notification.defaults |= Notification.DEFAULT_ALL;
-
 		notificationManager.notify(notificationId, notification);
 	}
 

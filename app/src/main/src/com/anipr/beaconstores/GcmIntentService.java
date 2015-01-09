@@ -1,6 +1,7 @@
-package com.anipr.beaconstores.gcmhandler;
+package com.anipr.beaconstores;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -9,8 +10,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.anipr.beaconstores.MainActivity;
 import com.anipr.beaconstores.R;
+import com.google.android.gms.games.Notifications;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmIntentService extends IntentService {
@@ -58,7 +59,7 @@ public class GcmIntentService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+                new Intent(this, Notifications.class), 0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -78,17 +79,28 @@ public class GcmIntentService extends IntentService {
     	mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
         PendingIntent contentIntent = null ;
-       
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-        .setSmallIcon(R.drawable.ic_launcher)
-        .setContentTitle("Notification Recieved")
-        .setStyle(new NotificationCompat.BigTextStyle()
-        .bigText(extras.toString()));
+        if(extras.getString("source").equals("Stampitgo"))
+        {
+        	contentIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, Notifications.class), 0);
+        }else{
+        	
+           Intent i =new Intent(this, MainActivity.class);
+		   
+		contentIntent = PendingIntent.getActivity(this, 0,
+		            i, 0);
+        	
+        }
         
-        mBuilder.setContentIntent(contentIntent);
-        mBuilder.setAutoCancel(true);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        Notification notification = new Notification.Builder(
+                getApplicationContext()).setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(extras.getString("title")).setContentText(extras.getString("message"))
+                .setAutoCancel(true)
+                .setContentIntent(contentIntent).build();
+        notification.defaults |= Notification.DEFAULT_SOUND;
+        notification.defaults |= Notification.DEFAULT_LIGHTS;
+        notification.defaults |= Notification.DEFAULT_VIBRATE;
+        mNotificationManager.notify(NOTIFICATION_ID,notification);
     }catch(Exception e){
     	e.printStackTrace();
     }

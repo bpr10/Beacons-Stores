@@ -1,4 +1,4 @@
-package com.anipr.beaconstores.gcmhandler;
+package com.anipr.beaconstores;
 
 import android.app.Activity;
 import android.content.ComponentName;

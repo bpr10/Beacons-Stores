@@ -1,14 +1,8 @@
-package com.anipr.beaconstores.gcmhandler;
-
+package com.anipr.beaconstores;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,15 +10,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Request.Method;
 import com.android.volley.Request.Priority;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.anipr.beaconstores.AppController;
-import com.anipr.beaconstores.MainActivity;
 import com.anipr.beaconstores.datahandler.CustomParamRequest;
+import com.anipr.beaconstores.datahandler.WebDataHandler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -75,7 +67,6 @@ public class GCMUtility {
 		return true;
 	}
 
-	@SuppressLint("NewApi")
 	private String getRegistrationId(Context context) {
 		final SharedPreferences prefs = getGCMPreferences(context);
 		String registrationId = prefs.getString(PROPERTY_REG_ID, "");
@@ -111,55 +102,54 @@ public class GCMUtility {
 	}
 
 	private void registerInBackground() {
-		new AsyncTask<Void , Void , Void >() {
-	        @Override
-	        protected Void doInBackground(Void... params) {
-	        	try {
-	                if (gcm == null) {
-	                    gcm = GoogleCloudMessaging.getInstance(context);
-	                }
-	                regid = gcm.register(SENDER_ID);
-	                
-	        	}
-	        	catch (IOException e)
-	        	{
-	        		Log.e("CM regid Error", e.toString());
-	        	}
-	        	Log.i("registering device ", regid);
-	    	   
-//	        	String gcmPayload = "{\"id\": \""+regid+"\",\"platform\": \"android\"}";
-	        	Map<String, String>  gcmPayload = new HashMap<String, String>();
-	        	gcmPayload.put("registration_id", regid);
-	        	JSONObject GCMJSON = new JSONObject(gcmPayload);
-	        	storeRegistrationId(context, regid);	
-	    	    CustomParamRequest gcmRequest = new CustomParamRequest(Method.POST, "http://ehapi.cloudapp.net:9000/gcmdevice_list/", null, null,GCMJSON.toString(), new Response.Listener<String>() {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					if (gcm == null) {
+						gcm = GoogleCloudMessaging.getInstance(context);
+					}
+					regid = gcm.register(SENDER_ID);
 
-	    			@Override
-	    			public void onResponse(String arg0) {
-	    				Toast.makeText(context, "Device Registered", Toast.LENGTH_SHORT).show();
-	    				Log.d("DEVICE registered with response", regid+arg0.toString());
-	    			}
-	    		}, new Response.ErrorListener() {
+				} catch (IOException e) {
+					Log.e("CM regid Error", e.toString());
+				}
+				Log.i("registering device ", regid);
 
-	    			@Override
-	    			public void onErrorResponse(VolleyError arg0) {
-	    				Toast.makeText(context, "Error "+arg0.getMessage(), Toast.LENGTH_LONG).show();
-	    				Log.e("DEVICE registration Error", arg0.toString());
-	    			}
-	    		},Priority.LOW);
-	    	    AppController.getInstance().addToRequestQueue(gcmRequest);
-	    	    return null;
-	            
-	        }
+				String gcmPayload = "{\"registration_id\": \"" + regid
+						+ "\",\"platform\": \"android\"}";
+				storeRegistrationId(context, regid);
+				CustomParamRequest gcmRequest = new CustomParamRequest(
+						Method.POST, WebDataHandler.ConnectionString
+								+ "gcmdevice_list/", AppController.cookie,
+						null, gcmPayload, new Response.Listener<String>() {
 
-	        @Override
-	        protected void onPostExecute( Void Result) {
-	           
-	        	Log.d("", regid);
-	            
-	        }
-	    }.execute(null, null, null);
-		 
+							@Override
+							public void onResponse(String arg0) {
+								Log.d("DEVICE registered with response", regid
+										+ arg0.toString());
+							}
+						}, new Response.ErrorListener() {
+
+							@Override
+							public void onErrorResponse(VolleyError arg0) {
+								Log.e("DEVICE registration Error",
+										arg0.toString());
+							}
+						}, Priority.LOW);
+				AppController.getInstance().addToRequestQueue(gcmRequest);
+				return null;
+
+			}
+
+			@Override
+			protected void onPostExecute(Void Result) {
+
+				Log.d("", regid);
+
+			}
+		}.execute(null, null, null);
+
 	}
 
 	private void storeRegistrationId(Context context, String regId) {
@@ -172,4 +162,3 @@ public class GCMUtility {
 		editor.commit();
 	}
 }
-

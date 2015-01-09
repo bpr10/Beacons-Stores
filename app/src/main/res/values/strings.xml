@@ -4,5 +4,10 @@
     <string name="app_name">BeaconStores</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
+    <string name="title_activity_login">Login</string>
+    <string name="title_activity_super">SuperActivity</string>
+    <string name="title_activity_dmain">DMainActivity</string>
+    <string name="title_activity_offer_details">StoreName</string>
+	<string name="exit_offer_welcome_msg">Hey! Thanks for \n dropping by!\n Now you are eligible to avail</string>
+	<string name="entry_offer_welcome_msg">Hey there! \n Check out our welcome offer</string>
 </resources>

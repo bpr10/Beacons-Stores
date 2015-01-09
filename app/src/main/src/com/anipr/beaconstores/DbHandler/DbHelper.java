@@ -49,7 +49,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final int BEACON_LEFT = 0;
 
 	// OffersTable Columns
-	public static final String offerCode = "OfferCode";
+	public static final String offerCode = "_id";
 	public static final String storeCode = "StoreCode";
 	public static final String offerType = "OferType";
 	public static final String offerName = "OfferName";
