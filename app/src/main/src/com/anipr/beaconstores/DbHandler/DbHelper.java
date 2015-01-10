@@ -38,6 +38,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String beaconMinorId = "Minor";
 	public static final String beaconStore = "StoreCode";
 	public static final String beaconDepartment = "Department";
+	public static final String minimunDetectionDistance = "DetectionDistance";
+	public static final String notificationInterval = "NotificationInterval";
 
 	// BeaconsHistoryTable columns
 	public static final String BeaconEntryTableRowId = "_ID";
@@ -57,22 +59,24 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String offerStartDate = "startDate";
 	public static final String offerEndDate = "endDate";
 	public static final String offerMinMembership = "membership";
-	public static final String minimumDuration = "timeperiod" ;
+	public static final String minimumDuration = "timeperiod";
 	public static final int OFFER_TYPE_ENTRY = 1;
-	public static final int OFFER_TYPE_EXIT = 0 ;
+	public static final int OFFER_TYPE_EXIT = 0;
 
 	// Table Creation queries
 	final String createOffersTable = "create table if not exists "
-			+ OFFERS_TABLE + " ( " + offerCode + " text primary key, " + storeCode
-			+ " text, " + offerType + " number, " + offerDesc + " text, "
-			 + offerName + " text, "
-			+ offerMinMembership + " integer, " + offerStartDate + " integer, " + minimumDuration + " integer, "
-			+ offerEndDate + " integer); ";
+			+ OFFERS_TABLE + " ( " + offerCode + " text primary key, "
+			+ storeCode + " text, " + offerType + " number, " + offerDesc
+			+ " text, " + offerName + " text, " + offerMinMembership
+			+ " integer, " + offerStartDate + " integer, " + minimumDuration
+			+ " integer, " + offerEndDate + " integer); ";
 
 	final String createBeaconsTable = "create table if not exists "
 			+ beaconsTable + " ( " + beaconMAC + " text primary key, "
 			+ beaconMajorId + " number, " + beaconMinorId + " number, "
-			+ beaconStore + " text, " + beaconDepartment + " text); ";
+			+ beaconStore + " text, " + minimunDetectionDistance + " number, "
+			+ notificationInterval + " number, " + beaconDepartment
+			+ " text); ";
 
 	final String createBeaconsHIstoryTableSchema = "create table if not exists "
 			+ BEACONS_HISTORY_TABLE
@@ -82,8 +86,10 @@ public class DbHelper extends SQLiteOpenHelper {
 			+ BeaconEntryTime
 			+ " text, "
 			+ BeaconExitTime
-			+ " text, "+ BeaconEntryNotificationID
-			+ " integer, " + BeaconExitNotificationID+ " integer); ";
+			+ " text, "
+			+ BeaconEntryNotificationID
+			+ " integer, "
+			+ BeaconExitNotificationID + " integer); ";
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

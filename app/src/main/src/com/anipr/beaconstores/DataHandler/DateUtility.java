@@ -18,11 +18,9 @@ public class DateUtility {
 
 	public Calendar convertSerevrDatetoLocalDate(String serverDate) {
 
-		String date = serverDate.substring(0, 10);
-		String time = serverDate.substring(11, 19);
-		String timeString = date + " " + time;
+		String timeString = serverDate+":00";
 		SimpleDateFormat sourceFormat = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss");
+				"yyyy/MM/dd HH:mm:ss");
 		sourceFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		Date parsed = null;
 		try {
@@ -236,5 +234,32 @@ public class DateUtility {
 							Calendar.SHORT, Locale.US) + " "
 					+ dateToChange.get(Calendar.YEAR);
 		}
+	}
+	Calendar convertPushFormat(String serverDate)
+	{
+		SimpleDateFormat sourceFormat = new SimpleDateFormat(
+				"yyyy/MM/dd");
+		sourceFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		Date parsed = null;
+		try {
+			parsed = sourceFormat.parse(serverDate);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+
+		Calendar cal = Calendar.getInstance();
+		TimeZone tz = TimeZone.getTimeZone(cal.getTimeZone().toString());
+		SimpleDateFormat destFormat = new SimpleDateFormat(
+				"EEE MMM dd HH:mm:ss zzz yyyy");
+		destFormat.setTimeZone(tz);
+		Date resultDate = null;
+		try {
+			resultDate = destFormat.parse(parsed.toString());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		Calendar localCalender = Calendar.getInstance();
+		localCalender.setTime(resultDate);
+		return localCalender;
 	}
 }

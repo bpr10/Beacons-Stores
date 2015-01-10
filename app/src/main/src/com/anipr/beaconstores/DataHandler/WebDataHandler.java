@@ -60,6 +60,11 @@ public class WebDataHandler {
 									cv.put(DbHelper.beaconDepartment,
 											currentObj
 													.getString("department_id"));
+									cv.put(DbHelper.minimunDetectionDistance,currentObj
+											.getString("distance") );
+									cv.put(DbHelper.notificationInterval,currentObj
+											.getString("time") );
+									
 									dbWrite.insert(DbHelper.beaconsTable, "",
 											cv);
 

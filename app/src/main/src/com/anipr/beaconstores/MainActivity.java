@@ -2,6 +2,7 @@ package com.anipr.beaconstores;
 
 import java.util.Random;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.anipr.beaconstores.beaconhandler.BeaconDetectorService;
 import com.anipr.beaconstores.datahandler.WebDataHandler;
 import com.anipr.beaconstores.dbhandler.DbHelper;
+import com.estimote.sdk.BeaconManager;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends SuperActivity {
@@ -43,11 +45,11 @@ public class MainActivity extends SuperActivity {
 		setContentView(R.layout.activity_main);
 		Log.d(tag, "OnCreate Called");
 		webDataHandler = new WebDataHandler(getApplicationContext());
-		webDataHandler.getOffers();
 		webDataHandler.getRegisteredBeacons();
 		new GCMUtility(this);
-		Intent i = new Intent(this, BeaconDetectorService.class);
-		startService(i);
+
+		webDataHandler.getOffers();
+
 		Log.i(tag, "Service Started");
 		offersGrid = (ListView) findViewById(R.id.offers_listview);
 		String offersQurey = "SELECT * FROM  " + DbHelper.OFFERS_TABLE;

@@ -2,6 +2,7 @@ package com.anipr.beaconstores;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.text.TextUtils;
@@ -26,7 +27,19 @@ public class AppController extends Application {
 			}
 		});
 	}
+	public boolean userLoggedIn() {
+		SharedPreferences loginPreferences = getSharedPreferences(
+				CommonConstants.LOGIN_SHARED_PREF_NAME, Context.MODE_PRIVATE);
+		if (loginPreferences.getString(
+				CommonConstants.LOGIN_SHARED_PREF_NAME_LoggedUser,
+				CommonConstants.NO_LOGGED_USER).equals(
+				CommonConstants.NO_LOGGED_USER)) {
+			return false;
+		} else {
+			return true;
+		}
 
+	}
 	@Override
 	public void onCreate() {
 		super.onCreate();

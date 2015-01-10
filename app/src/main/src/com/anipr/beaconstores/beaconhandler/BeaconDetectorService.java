@@ -5,12 +5,15 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Service;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.anipr.beaconstores.NotificationsHandler;
+import com.anipr.beaconstores.dbhandler.DbHelper;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.BeaconManager.RangingListener;
@@ -25,9 +28,10 @@ public class BeaconDetectorService extends Service {
 																		// without
 																		// "-"
 	};
-//	private static final String ESTIMOTE_PROXIMITY_UUID = "b9407f30-f5f8-466e-aff9-25556b57fe6d";
-//	private static final Region ALL_ESTIMOTE_BEACONS = new Region("regionId",
-//			ESTIMOTE_PROXIMITY_UUID, 500, 10000);
+	// private static final String ESTIMOTE_PROXIMITY_UUID =
+	// "b9407f30-f5f8-466e-aff9-25556b57fe6d";
+	// private static final Region ALL_ESTIMOTE_BEACONS = new Region("regionId",
+	// ESTIMOTE_PROXIMITY_UUID, 500, 10000);
 	private BeaconManager beaconManager;
 	String TAG = "BeaconService";
 
@@ -41,7 +45,8 @@ public class BeaconDetectorService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Toast.makeText(getApplicationContext(), "service started", Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), "service started",
+				Toast.LENGTH_SHORT).show();
 		Log.i(tag, "Beacon Detector Service started ");
 		if (beaconManager == null) {
 			beaconManager = new BeaconManager(this);
@@ -57,21 +62,13 @@ public class BeaconDetectorService extends Service {
 			public void onBeaconsDiscovered(Region paramRegion,
 					List<Beacon> paramList) {
 				if (paramList != null && !paramList.isEmpty()) {
-					Beacon beacon = paramList.get(0);
 
-					Proximity proximity = Utils.computeProximity(beacon);
-					if (proximity == Proximity.IMMEDIATE) {
-						//Beacon Detected ;
-						notificationHandler.performBeaconEntryAction(beacon);
-					} else if (proximity == Proximity.NEAR) {
-						// Log.d(TAG,
-						// "exiting in region "
-						notificationHandler.performBeaconExitAction(beacon);
-//						notificationHandler.postExitNotification(beacon);
-						//Beacon Leaving
-					}
+					Beacon beacon = paramList.get(0);
+					checkBeacon(beacon);
+
 				}
 			}
+
 		});
 
 		beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
@@ -108,22 +105,29 @@ public class BeaconDetectorService extends Service {
 		return null;
 	}
 
-	// @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	// @SuppressLint("NewApi")
-	// private void postNotification(String msg) {
-	// Intent notifyIntent = new Intent(getApplicationContext(),
-	// MainActivity.class);
-	// notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	// PendingIntent pendingIntent = PendingIntent.getActivities(
-	// getApplicationContext(), 0, new Intent[] { notifyIntent },
-	// PendingIntent.FLAG_UPDATE_CURRENT);
-	// Notification notification = new Notification.Builder(
-	// getApplicationContext()).setSmallIcon(R.drawable.ic_launcher)
-	// .setContentTitle("Notify Demo").setContentText(msg)
-	// .setAutoCancel(true).setContentIntent(pendingIntent).build();
-	// notification.defaults |= Notification.DEFAULT_SOUND;
-	// notification.defaults |= Notification.DEFAULT_LIGHTS;
-	// notificationManager.notify(123, notification);
-	//
-	// }
+	private void checkBeacon(Beacon beacon) {
+		DbHelper dbhelper = DbHelper.getInstance(getApplicationContext());
+		String query = "select * from " + DbHelper.beaconsTable + " where "
+				+ DbHelper.beaconMAC + " = '" + beacon.getMacAddress() + "' ;";
+		SQLiteDatabase dbWrite = dbhelper.getWritableDatabase();
+		Cursor beaconsCursor = dbWrite.rawQuery(query, null);
+
+		if (beaconsCursor.moveToFirst()) {
+			int minDetectionDIstance = beaconsCursor.getInt(beaconsCursor
+					.getColumnIndex(DbHelper.minimunDetectionDistance));
+			Log.e(tag, "Min Detection DIstance " + minDetectionDIstance);
+			if (Utils.computeAccuracy(beacon) < minDetectionDIstance) {
+				Log.e(tag,
+						"Performing entry action "
+								+ Utils.computeAccuracy(beacon));
+				notificationHandler.performBeaconEntryAction(beacon);
+			} else {
+				Log.e(tag,
+						"Performing exit action "
+								+ Utils.computeAccuracy(beacon));
+				notificationHandler.performBeaconExitAction(beacon);
+			}
+		}
+	}
+
 }

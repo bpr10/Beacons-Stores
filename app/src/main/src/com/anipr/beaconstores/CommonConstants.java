@@ -8,4 +8,6 @@ public class CommonConstants {
 			"coffee", "drink", "chocolate", "burger", "candy", "mocktail",
 			"beer", "cocktail", "mojito", "sundae", "greentea", "espresso",
 			"latte" };
+	public static String NOTIFICATION_SHARED_PREFS = "notifiactionSharedPrefrences";
+	public static String LAST_NOTIFICATION_PUSH_TIME = "LastNotificationPushTime";
 }

@@ -10,6 +10,8 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -96,10 +98,13 @@ public class NotificationsHandler {
 				offerName = "";
 				Log.i(tag, "Cursor Empty");
 			}
+			if (canPostNotification()) {
+				postNotification("Welcome to " + storeCode, offerName,
+						markEntryTime(beacon), offerCode);
+			}
 
 		}
-		postNotification("Welcome to " + storeCode, offerName,
-				markEntryTime(beacon), offerCode);
+
 	}
 
 	public void postExitNotification(Beacon beacon) {
@@ -120,7 +125,7 @@ public class NotificationsHandler {
 					+ DbHelper.offerMinMembership + " DESC, "
 					+ DbHelper.offerEndDate + " ASC, "
 					+ DbHelper.minimumDuration + " DESC";
-			Log.i("feedback xursor query", feedbackOfferQuery);
+			Log.i("feedback cursor query", feedbackOfferQuery);
 			DbHelper dbhelper = DbHelper.getInstance(context);
 			SQLiteDatabase dbWrite = dbhelper.getWritableDatabase();
 			Cursor feedbackOfferDetailsCursor = dbWrite.rawQuery(
@@ -140,8 +145,11 @@ public class NotificationsHandler {
 				storeCode = "Thank you for visiting us";
 				offerName = "";
 			}
-			postNotification(storeCode, offerName,
-					markExitTime(entryRowInfo.get(ENTRY_ROW_ID)), offerCode);
+			if (canPostNotification()) {
+				postNotification(storeCode, offerName,
+						markExitTime(entryRowInfo.get(ENTRY_ROW_ID)), offerCode);
+			}
+
 		}
 
 	}
@@ -239,8 +247,54 @@ public class NotificationsHandler {
 				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)
 				.setContentText(content).setAutoCancel(true)
 				.setContentIntent(pendingIntent).build();
+		
 		notification.defaults |= Notification.DEFAULT_ALL;
+
 		notificationManager.notify(notificationId, notification);
+
+	}
+
+	boolean canPostNotification() {
+		SharedPreferences mPreferences = context
+				.getSharedPreferences(
+						CommonConstants.NOTIFICATION_SHARED_PREFS,
+						Context.MODE_PRIVATE);
+		Long lastNotificationTime = mPreferences.getLong(
+				CommonConstants.LAST_NOTIFICATION_PUSH_TIME, Calendar
+						.getInstance().getTimeInMillis() - 7200000);
+		String notificationIntervalQuery = "SELECT * FROM "
+				+ DbHelper.beaconsTable;
+		int notificationInterval = 10;
+		Cursor notificationIntervalCursor = DbHelper.getInstance(context)
+				.getReadableDatabase()
+				.rawQuery(notificationIntervalQuery, null);
+		if (notificationIntervalCursor.moveToFirst()) {
+			Log.e(notificationIntervalQuery, "rows found");
+			notificationInterval = notificationIntervalCursor
+					.getInt(notificationIntervalCursor
+							.getColumnIndex(DbHelper.notificationInterval));
+		}
+		Log.e(tag, "Notification Interval " + notificationInterval);
+		if (((Calendar.getInstance().getTimeInMillis() - lastNotificationTime) / 1000) > notificationInterval) {
+			Editor mPreferencesEditor = mPreferences.edit();
+			mPreferencesEditor.putLong(
+					CommonConstants.LAST_NOTIFICATION_PUSH_TIME, Calendar
+							.getInstance().getTimeInMillis());
+			mPreferencesEditor.commit();
+			Log.e("can push",
+					"Notification Interval "
+							+ (Calendar.getInstance().getTimeInMillis() - lastNotificationTime)
+							/ 1000);
+			return true;
+
+		} else {
+			Log.e("Can not post notification", (Calendar.getInstance()
+					.getTimeInMillis() - lastNotificationTime)
+					/ 1000
+					+ " Secs ago");
+			return false;
+		}
+
 	}
 
 	public boolean checkBeaconIfNotified(Beacon beacon) {

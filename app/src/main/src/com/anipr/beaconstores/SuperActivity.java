@@ -1,5 +1,9 @@
 package com.anipr.beaconstores;
 
+import com.anipr.beaconstores.beaconhandler.BeaconDetectorService;
+import com.estimote.sdk.BeaconManager;
+
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,17 +13,39 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class SuperActivity extends ActionBarActivity {
 	private String tag = getClass().getSimpleName();
+	private BeaconManager beaconManager;
+	private static final int REQUEST_ENABLE_BT = 1234;
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (!userLoggedIn()) {
+		if (!AppController.getInstance().userLoggedIn()) {
 			Intent intent = new Intent(this, Login.class);
 			startActivity(intent);
 			finish();
+		} else {
+			beaconManager = new BeaconManager(getApplicationContext());
+			// Check if device supports Bluetooth Low Energy.
+			if (!beaconManager.hasBluetooth()) {
+				Toast.makeText(this,
+						"Device does not have Bluetooth Low Energy",
+						Toast.LENGTH_LONG).show();
+				return;
+			}
+
+			// If Bluetooth is not enabled, let user enable it.
+			if (!beaconManager.isBluetoothEnabled()) {
+				Intent enableBtIntent = new Intent(
+						BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+			} else {
+				Intent i = new Intent(this, BeaconDetectorService.class);
+				startService(i);
+			}
 		}
 	}
 
@@ -63,17 +89,4 @@ public class SuperActivity extends ActionBarActivity {
 		finish();
 	}
 
-	private boolean userLoggedIn() {
-		SharedPreferences loginPreferences = getSharedPreferences(
-				CommonConstants.LOGIN_SHARED_PREF_NAME, Context.MODE_PRIVATE);
-		if (loginPreferences.getString(
-				CommonConstants.LOGIN_SHARED_PREF_NAME_LoggedUser,
-				CommonConstants.NO_LOGGED_USER).equals(
-				CommonConstants.NO_LOGGED_USER)) {
-			return false;
-		} else {
-			return true;
-		}
-
-	}
 }
