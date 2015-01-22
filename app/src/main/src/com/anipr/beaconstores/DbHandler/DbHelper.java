@@ -53,6 +53,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	// OffersTable Columns
 	public static final String offerCode = "_id";
 	public static final String storeCode = "StoreCode";
+	public static final String storeName = "StoreName";
 	public static final String offerType = "OferType";
 	public static final String offerName = "OfferName";
 	public static final String offerDesc = "OfferDesc";
@@ -66,7 +67,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	// Table Creation queries
 	final String createOffersTable = "create table if not exists "
 			+ OFFERS_TABLE + " ( " + offerCode + " text primary key, "
-			+ storeCode + " text, " + offerType + " number, " + offerDesc
+			+ storeCode + " text, " +storeName + " text, " + offerType + " number, " + offerDesc
 			+ " text, " + offerName + " text, " + offerMinMembership
 			+ " integer, " + offerStartDate + " integer, " + minimumDuration
 			+ " integer, " + offerEndDate + " integer); ";

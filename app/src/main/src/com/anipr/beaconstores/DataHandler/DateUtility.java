@@ -7,8 +7,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+@SuppressLint("SimpleDateFormat")
 public class DateUtility {
 	private String tag = "DateUtility";
 
@@ -16,6 +18,7 @@ public class DateUtility {
 
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public Calendar convertSerevrDatetoLocalDate(String serverDate) {
 
 		String timeString = serverDate+":00";

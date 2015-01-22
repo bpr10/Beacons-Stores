@@ -2,13 +2,13 @@ package com.anipr.beaconstores;
 
 import java.util.Random;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +18,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.anipr.beaconstores.beaconhandler.BeaconDetectorService;
 import com.anipr.beaconstores.datahandler.WebDataHandler;
 import com.anipr.beaconstores.dbhandler.DbHelper;
-import com.estimote.sdk.BeaconManager;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends SuperActivity {
@@ -33,6 +31,7 @@ public class MainActivity extends SuperActivity {
 	private OffersGridAdapter mOffersGridAdapter;
 	private SQLiteDatabase dbRead;
 	private Cursor offersCursor;
+	private CardView cardView;
 
 	@Override
 	protected void onStart() {
@@ -44,6 +43,9 @@ public class MainActivity extends SuperActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		Log.d(tag, "OnCreate Called");
+		Intent startServiceIntent = new Intent(this,
+				BeaconDetectorService.class);
+		startService(startServiceIntent);
 		webDataHandler = new WebDataHandler(getApplicationContext());
 		webDataHandler.getRegisteredBeacons();
 		new GCMUtility(this);
@@ -57,6 +59,8 @@ public class MainActivity extends SuperActivity {
 				.getWritableDatabase();
 		offersCursor = dbRead.rawQuery(offersQurey, null);
 		if (offersCursor.moveToFirst()) {
+			cardView = (CardView) findViewById(R.id.card_view);
+			cardView.setVisibility(View.GONE);
 			mOffersGridAdapter = new OffersGridAdapter(getApplicationContext(),
 					offersCursor, true);
 			offersGrid.setAdapter(mOffersGridAdapter);
@@ -73,6 +77,9 @@ public class MainActivity extends SuperActivity {
 					startActivity(i);
 				}
 			});
+		} else {
+			cardView = (CardView) findViewById(R.id.card_view);
+			cardView.setVisibility(View.VISIBLE);
 		}
 	}
 

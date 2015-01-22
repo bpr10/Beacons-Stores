@@ -3,6 +3,12 @@ package com.anipr.beaconstores;
 import android.app.Activity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,8 +38,10 @@ public class OfferDetails extends Activity {
 		if (offerDetailCursor.moveToFirst()) {
 			if (offerDetailCursor.getString(
 					offerDetailCursor.getColumnIndex(DbHelper.offerType))
-					.equals(DbHelper.OFFER_TYPE_ENTRY)) {
+					.equals(DbHelper.OFFER_TYPE_ENTRY+"")) {
 				welcomeMsg.setText(getString(R.string.entry_offer_welcome_msg));
+			}else{
+					welcomeMsg.setText(getString(R.string.exit_offer_welcome_msg));
 			}
 		}
 		offerName.setText(offerDetailCursor.getString(offerDetailCursor
@@ -61,4 +69,26 @@ public class OfferDetails extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	public static Bitmap getRoundedRectBitmap(Bitmap bitmap, int pixels) {
+	    Bitmap result = null;
+	    try { 
+	        result = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+	        Canvas canvas = new Canvas(result);
+	 
+	        int color = 0xff424242;
+	        Paint paint = new Paint();
+	        Rect rect = new Rect(0, 0, 200, 200);
+	 
+	        paint.setAntiAlias(true);
+	        canvas.drawARGB(0, 0, 0, 0);
+	        paint.setColor(color);
+	        canvas.drawCircle(50, 50, 50, paint);
+	        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+	        canvas.drawBitmap(bitmap, rect, rect, paint);
+	 
+	    } catch (NullPointerException e) {
+	    } catch (OutOfMemoryError o) {
+	    } 
+	    return result;
+	} 
 }

@@ -44,7 +44,8 @@ public class WebDataHandler {
 							if (resposne.getString("code").equals("1")) {
 								JSONArray dataArray = resposne
 										.getJSONArray("data");
-								Toast.makeText(context, "Stores data Refreshed",
+								Toast.makeText(context,
+										"Stores data Refreshed",
 										Toast.LENGTH_SHORT).show();
 								for (int i = 0; i < dataArray.length(); i++) {
 									JSONObject currentObj = dataArray
@@ -60,11 +61,11 @@ public class WebDataHandler {
 									cv.put(DbHelper.beaconDepartment,
 											currentObj
 													.getString("department_id"));
-									cv.put(DbHelper.minimunDetectionDistance,currentObj
-											.getString("distance") );
-									cv.put(DbHelper.notificationInterval,currentObj
-											.getString("time") );
-									
+									cv.put(DbHelper.minimunDetectionDistance,
+											currentObj.getString("distance"));
+									cv.put(DbHelper.notificationInterval,
+											currentObj.getString("time"));
+
 									dbWrite.insert(DbHelper.beaconsTable, "",
 											cv);
 

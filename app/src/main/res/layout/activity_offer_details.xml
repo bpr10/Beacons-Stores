@@ -17,7 +17,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="62dp"
         android:gravity="center"
-        android:text="@string/exit_offer_welcome_msg"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF"
         android:textSize="22sp" />
@@ -30,7 +29,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="48dp"
         android:gravity="center"
-        android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
 
@@ -42,7 +40,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 

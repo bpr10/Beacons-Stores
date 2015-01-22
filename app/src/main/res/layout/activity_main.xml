@@ -16,10 +16,32 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:animateLayoutChanges="true"
-        android:fastScrollEnabled="true"
-        android:dividerHeight="8dp"
         android:clickable="true"
-        android:divider="@android:color/transparent" >
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp"
+        android:fastScrollEnabled="true" >
     </ListView>
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        card_view:cardCornerRadius="4dp"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/info_text"
+            android:layout_gravity="center"
+            android:text="No Current Offers "
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:background="@color/accent"
+            android:padding="30dp" />
+    </android.support.v7.widget.CardView>
 
 </RelativeLayout>

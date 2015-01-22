@@ -19,7 +19,6 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.BeaconManager.RangingListener;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.Utils;
-import com.estimote.sdk.Utils.Proximity;
 import com.estimote.sdk.utils.L;
 
 public class BeaconDetectorService extends Service {

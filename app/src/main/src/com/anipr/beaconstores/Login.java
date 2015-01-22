@@ -1,6 +1,11 @@
 package com.anipr.beaconstores;
 
-import com.anipr.beaconstores.datahandler.WebDataHandler;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.http.protocol.ResponseConnControl;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +18,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.Request.Method;
+import com.android.volley.VolleyError;
+import com.anipr.beaconstores.datahandler.CustomParamRequest;
+import com.anipr.beaconstores.datahandler.WebDataHandler;
 
 public class Login extends ActionBarActivity {
 	private EditText userName, password;
@@ -45,12 +57,22 @@ public class Login extends ActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				if (userName.getText().length() != 0) {
-					if (userName.getText().length() != 0) {
-						// Fire Request
-						saveUserLoginDetails("User0ne");
-						Intent i = new Intent(Login.this, MainActivity.class);
-						startActivity(i);
-						finish();
+					if (password.getText().length() != 0) {
+						if (userName.getText().toString().equals("demo")
+								&& password.getText().toString().equals("demo")) {
+							// Fire Request
+
+							saveUserLoginDetails("User0ne");
+							Intent i = new Intent(Login.this,
+									MainActivity.class);
+							startActivity(i);
+							finish();
+						} else {
+							Toast.makeText(getApplicationContext(),
+									"Invalid Credentials", Toast.LENGTH_SHORT)
+									.show();
+						}
+
 					} else {
 						Log.d(tag, "Password Blank");
 						password.setError("Please Enter your password");

@@ -79,6 +79,7 @@ public class GcmIntentService extends IntentService {
 
 		mBuilder.setContentIntent(contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+
 	}
 
 	private void handlePush(Bundle extras) {
@@ -108,7 +109,7 @@ public class GcmIntentService extends IntentService {
 		case 5:
 			try {
 				deleteOffer(new JSONObject(extras.getString("data"))
-						.getString("offerCode"));
+						.getString("offer_code"));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -133,6 +134,7 @@ public class GcmIntentService extends IntentService {
 			cv.put(DbHelper.notificationInterval, currentObj.getString("time"));
 
 			dbWrite.insert(DbHelper.beaconsTable, "", cv);
+			Log.e(tag, "Beacon Inserted");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -166,8 +168,8 @@ public class GcmIntentService extends IntentService {
 					new DateUtility().convertSerevrDatetoLocalDate(
 							currentObj.getString("end_time")).getTimeInMillis());
 			dbWrite.insert(DbHelper.OFFERS_TABLE, null, cv);
-			Log.d(tag, "Offers Inserted");
-			Log.d(tag, currentObj.getString("start_time"));
+			Log.e(tag, "Offers Inserted");
+			Log.e(tag, currentObj.getString("start_time"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -180,7 +182,7 @@ public class GcmIntentService extends IntentService {
 			SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 			dbWrite.delete(DbHelper.OFFERS_TABLE, DbHelper.offerCode + "='"
 					+ offerCode + "'", null);
-
+			Log.e(tag, "Offer Deleted " + offerCode);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -192,24 +194,26 @@ public class GcmIntentService extends IntentService {
 			DbHelper dbHelper = DbHelper.getInstance(getApplicationContext());
 			SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 			String query = "SELECT * FROM " + DbHelper.beaconsTable + " WHERE "
-					+ DbHelper.beaconMAC + " = "
-					+ currentObj.getString("becon_id");
+					+ DbHelper.beaconMAC + " = '"
+					+ currentObj.getString("becon_id") + "'";
 			Cursor cursor = dbWrite.rawQuery(query, null);
 
 			if (cursor.moveToFirst()) {
 
 				ContentValues cv = new ContentValues();
 				cv.put(DbHelper.beaconMAC, currentObj.getString("becon_id"));
-				cv.put(DbHelper.beaconStore, currentObj.getString("store_id"));
+				cv.put(DbHelper.beaconStore, currentObj.getString("store"));
 				cv.put(DbHelper.beaconDepartment,
-						currentObj.getString("department_id"));
+						currentObj.getString("department"));
 				cv.put(DbHelper.minimunDetectionDistance,
 						currentObj.getString("distance"));
 				cv.put(DbHelper.notificationInterval,
 						currentObj.getString("time"));
 				dbWrite.update(DbHelper.beaconsTable, cv, DbHelper.beaconMAC
 						+ " = '" + currentObj.getString("becon_id") + "'", null);
-
+				Log.e(tag, "Beacon Updated");
+			} else {
+				Log.e(tag, "Beacon Did not Update");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -222,6 +226,7 @@ public class GcmIntentService extends IntentService {
 			SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 			dbWrite.delete(DbHelper.beaconsTable, DbHelper.beaconMAC + "='"
 					+ beaconMac + "'", null);
+			Log.e(tag, "Beacon Deleted " + beaconMac);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -234,8 +239,8 @@ public class GcmIntentService extends IntentService {
 			DbHelper dbHelper = DbHelper.getInstance(getApplicationContext());
 			SQLiteDatabase dbWrite = dbHelper.getWritableDatabase();
 			String query = "SELECT * FROM " + DbHelper.OFFERS_TABLE + " WHERE "
-					+ DbHelper.offerCode + " = "
-					+ currentObj.getString("offer_code");
+					+ DbHelper.offerCode + " = '"
+					+ currentObj.getString("offer_code") + "'";
 			Cursor cursor = dbWrite.rawQuery(query, null);
 
 			if (cursor.moveToFirst()) {

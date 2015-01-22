@@ -72,10 +72,13 @@ public class NotificationsHandler {
 		SQLiteDatabase dbWrite = dbhelper.getWritableDatabase();
 		Cursor beaconsCursor = dbWrite.rawQuery(query, null);
 		String storeCode = "";
+		String storeName = "";
 		String offerName = "";
 		String offerCode = "";
 		if (beaconsCursor.moveToFirst()) {
 			storeCode = beaconsCursor.getString(beaconsCursor
+					.getColumnIndex(DbHelper.beaconStore));
+			storeName = beaconsCursor.getString(beaconsCursor
 					.getColumnIndex(DbHelper.beaconStore));
 
 			int userMembership = getUserMembership();
@@ -244,10 +247,10 @@ public class NotificationsHandler {
 				new Intent[] { notifyIntent },
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		Notification notification = new Notification.Builder(context)
-				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)
+				.setSmallIcon(R.drawable.beacon_gray).setContentTitle(title)
 				.setContentText(content).setAutoCancel(true)
 				.setContentIntent(pendingIntent).build();
-		
+
 		notification.defaults |= Notification.DEFAULT_ALL;
 
 		notificationManager.notify(notificationId, notification);
